@@ -72,3 +72,19 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+# Android build
+android/
+
+# iOS build
+ios/
+
+# Dependency directories
+/node_modules/
+
+# Ignore debug logs
+debug.log
+
+# Ignore environment-specific files
+.env
