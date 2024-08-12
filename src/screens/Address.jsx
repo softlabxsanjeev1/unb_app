@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { AuthContext } from '../context/authContext'
 import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { addAddress } from '../redux/slices/AddressSlice'
 
 // name: String,
 //     phone: String,
@@ -27,26 +29,31 @@ const Address = () => {
     const [city, setCity] = useState("")
     const [postalCode, setPostalCode] = useState("")
     const [country, setCountry] = useState("India")
+    const [statename, setStatename] = useState("")
+
     const navigation = useNavigation()
+    const dispatch = useDispatch();
 
 
     // console.log(userId)
+    const address = {
+        name,
+        phone,
+        houseno,
+        street,
+        landmark,
+        city,
+        statename,
+        country,
+        postalCode
+    }
 
     const handleAddress = async () => {
-        const address = {
-            name,
-            phone,
-            houseno,
-            street,
-            landmark,
-            city,
-            country,
-            postalCode
-        }
         try {
+            dispatch(addAddress(address))
             setLoading(true);
             const { data } = await axios.post(
-                "user/add-address",
+                "user/add-address/",
                 { userId, address }
             );
             // console.log(data)
@@ -57,6 +64,7 @@ const Address = () => {
             setStreet("")
             setLandmark("")
             setCity("")
+            setStatename("")
             setPostalCode("")
             Alert.alert("Success", "Address add successfully")
             setLoading(false)
@@ -75,14 +83,6 @@ const Address = () => {
                 <Text style={{ color: "#000000", fontSize: 18, fontWeight: "700" }}>Address New Address</Text>
             </View>
             <View style={styles.container}>
-                <View style={styles.rowContainer}>
-                    <Text style={styles.lable}>Country Name</Text>
-                    <TextInput style={styles.inputBox}
-                        value={country}
-                        onChangeText={(txt) => { setCountry(txt) }}
-                        inputMode='text'
-                        placeholder='Country name' />
-                </View>
                 <View style={styles.rowContainer}>
                     <Text style={styles.lable}>Full Name (First name/ Last name)</Text>
                     <TextInput style={styles.inputBox}
@@ -131,12 +131,28 @@ const Address = () => {
                         placeholder='eg. Bahadurgarh' />
                 </View>
                 <View style={styles.rowContainer}>
+                    <Text style={styles.lable}>State Name</Text>
+                    <TextInput style={styles.inputBox}
+                        value={statename}
+                        onChangeText={(txt) => { setStatename(txt) }}
+                        inputMode='text'
+                        placeholder='State name' />
+                </View>
+                <View style={styles.rowContainer}>
                     <Text style={styles.lable}>Pincode</Text>
                     <TextInput style={styles.inputBox}
                         value={postalCode}
                         onChangeText={(txt) => { setPostalCode(txt) }}
                         inputMode='numeric'
                         placeholder='Enter Pincode' />
+                </View>
+                <View style={styles.rowContainer}>
+                    <Text style={styles.lable}>Country Name</Text>
+                    <TextInput style={styles.inputBox}
+                        value={country}
+                        onChangeText={(txt) => { setCountry(txt) }}
+                        inputMode='text'
+                        placeholder='Country name' />
                 </View>
                 <Pressable style={styles.btn}
                     onPress={() => {

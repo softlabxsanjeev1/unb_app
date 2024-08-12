@@ -41,7 +41,7 @@ const Account = () => {
                     <TouchableOpacity
                         style={styles.btn}
                         onPress={() =>
-                            navigation.navigate("Order")
+                            navigation.navigate("Myorders")
                         }
                     >
                         <Image source={require('../assets/images/order.png')} style={styles.icon} />

@@ -3,24 +3,12 @@ const { createSlice } = require('@reduxjs/toolkit')
 const AddressSlice = createSlice({
     name: 'address',
     initialState: {
-        data: [],
+        data: {},
     },
     reducers: {
         addAddress(state, action) {
-            let tempData = state.data;
-            let isItemExist = false;
-            tempData.map(item => {
-                if (item.id == action.payload.id) {
-                    isItemExist = true;
-                    tempData = state.data;
-                }
-            });
-            if (!isItemExist) {
-                tempData.push(action.payload);
-            }
-            state.data = tempData;
-        },
-
+            state.data = action.payload;
+        }
     },
 });
 export const { addAddress } = AddressSlice.actions;

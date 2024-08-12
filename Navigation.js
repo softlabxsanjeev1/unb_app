@@ -11,13 +11,16 @@ import ProductDetail from './src/screens/ProductDetail';
 import Profile from './src/screens/Profile';
 import VerifyOtp from './src/screens/VerifyOtp';
 import Address from './src/screens/Address';
+import OrderSuccess from './src/screens/OrderSuccess';
+import Notification from './src/screens/Notification';
+import MyOrders from './src/screens/MyOrders';
 
 const Stack = createNativeStackNavigator();
 
 const Navigation = () => {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName='Splash'>
+            <Stack.Navigator initialRouteName='Ordersuccess'>
                 <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
                 <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
                 <Stack.Screen name="Verifyotp" component={VerifyOtp} options={{ headerShown: false }} />
@@ -27,9 +30,10 @@ const Navigation = () => {
                 <Stack.Screen name="Checkout" component={Checkout} options={{ headerShown: true }} />
                 <Stack.Screen name="Productdetail" component={ProductDetail} options={{ headerShown: true }} />
                 <Stack.Screen name="Address" component={Address} options={{ headerShown: false }} />
-                <Stack.Screen name="Profile" component={Profile} options={{
-                    headerShown: true, headerBackTitle: 'Edit Profile',
-                }} />
+                <Stack.Screen name="Notification" component={Notification} options={{ headerShown: true }} />
+                <Stack.Screen name="Myorders" component={MyOrders} options={{ headerShown: true }} />
+                <Stack.Screen name="Ordersuccess" component={OrderSuccess} options={{ headerShown: false }} />
+                <Stack.Screen name="Profile" component={Profile} options={{ headerShown: true }} />
             </Stack.Navigator>
         </NavigationContainer>
     )

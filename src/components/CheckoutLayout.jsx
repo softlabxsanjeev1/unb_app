@@ -8,7 +8,7 @@ const CheckoutLayout = ({ total, items }) => {
         <View style={styles.container}>
             <View style={styles.tab}>
                 <Text style={{ fontWeight: "500", fontSize: 16 }}>{`No of Items : ${items.length}`}</Text>
-                <Text style={{ fontWeight: "700", fontSize: 16 }}>{`Total Price : ${total} Rs`}</Text>
+                <Text style={{ fontWeight: "700", fontSize: 16 }}>{`Sub Price : ${total} Rs`}</Text>
             </View>
             <View style={styles.tab}>
                 <TouchableOpacity style={styles.checkout}

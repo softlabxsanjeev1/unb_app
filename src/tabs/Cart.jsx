@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { addItemToCart, reduceItemFromCart, removeItemFromCart } from '../redux/slices/CartSlice';
-import clear from '../assets/images/clear.png'
 import CheckoutLayout from '../components/CheckoutLayout';
 import { imagePath } from '../../App';
 
@@ -16,7 +15,7 @@ const Cart = () => {
     useEffect(() => {
         setCartItems(items.data);
     }, [items]);
-    // console.log(JSON.stringify(cartItems))
+    console.log(JSON.stringify(cartItems))
     const getTotal = () => {
         let total = 0;
         cartItems.map(item => {
@@ -33,23 +32,16 @@ const Cart = () => {
                             onPress={() => { navigation.navigate('Productdetail', { data: item }) }}
                             style={styles.productItem}>
                             <Image source={{ uri: `${imagePath}${item.image}` }} style={styles.itemImage} />
-                            <View style={{ marginTop: 10 }}>
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", width: 305 }}>
-                                    <View>
-                                        <Text style={styles.name}>
-                                            {item.name.length > 25
-                                                ? item.name.substring(0, 25) + '...' : item.name}
-                                        </Text>
-                                    </View>
-                                    <TouchableOpacity onPress={() => {
-                                        dispatch(removeItemFromCart(index))
-                                    }}>
-                                        <Image style={styles.clearImg} source={clear} />
-                                    </TouchableOpacity>
+                            <View style={{ paddingLeft: 15, paddingTop: 5 }}>
+                                <View style={{ flexDirection: "row", }}>
+                                    <Text style={styles.name}>
+                                        {item.name.length > 25
+                                            ? item.name.substring(0, 25) + '...' : item.name}
+                                    </Text>
+                                    <Text style={{ color: "#000000", fontSize: 16, marginLeft: 60, marginTop: 2 }}>Added Qty : {item.qty}</Text>
                                 </View>
-
+                                <Text style={styles.price}>{'Rs. ' + item.price}</Text>
                                 <View style={styles.qtyview}>
-                                    <Text style={styles.price}>{'Rs. ' + item.price}</Text>
                                     <View style={styles.btnContainer}>
                                         <TouchableOpacity style={styles.btnQty}
                                             onPress={() => {
@@ -69,8 +61,14 @@ const Cart = () => {
                                             }}>
                                             <Text style={styles.btnQtyText}>+</Text>
                                         </TouchableOpacity>
-
                                     </View>
+                                    <TouchableOpacity
+                                        style={styles.clearBtn}
+                                        onPress={() => {
+                                            dispatch(removeItemFromCart(index))
+                                        }}>
+                                        <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}>Remove</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -100,58 +98,62 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     productItem: {
-        width: Dimensions.get('window').width - 7,
-        height: 100,
+        width: Dimensions.get('window').width - 12,
+        height: "auto",
         marginTop: 3,
         backgroundColor: '#fff',
         flexDirection: 'row',
         alignItems: "center",
         border: "#0000",
         borderWidth: 0.5,
-        marginLeft: 3,
+        marginLeft: 5,
         borderRadius: 8
     },
     itemImage: {
-        width: 60,
-        height: 90,
+        width: 80,
+        height: 110,
         borderRadius: 20,
         padding: 10,
         objectFit: "contain"
     },
     name: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: '700',
-        marginLeft: 20,
-        marginBottom: 7,
-        color: "#000000"
+
+        color: "#000000",
     },
     price: {
         color: '#8fce00',
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '800',
-        marginLeft: 20,
-        marginTop: 5,
-        marginRight: 30
     },
     qtyview: {
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        marginLeft: -10,
+        marginTop: -8
     },
     btnContainer: {
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
         marginVertical: 20,
-        marginHorizontal: 10,
     },
     btnQty: {
         backgroundColor: "lightgray",
-        width: 40,
+        width: 30,
         alignItems: "center",
-        marginHorizontal: 10,
+        marginHorizontal: 13,
     },
     btnQtyText: {
-        fontSize: 20,
+        fontSize: 19,
+        fontWeight: "600",
+        color: "#000000"
+    },
+    qty: {
+        fontSize: 19,
+        fontWeight: "800",
+        color: "#000000"
     },
     grandTotal: {
         borderWidth: 1,
@@ -175,18 +177,23 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 18,
     },
-    clearImg: {
-        height: 25,
-        width: 25,
-        tintColor: "#f43e31",
-        marginTop: 6,
-        marginRight: 25
-    },
     noItems: {
         width: "100%",
         height: "100%",
         justifyContent: "center",
         alignItems: "center"
+    },
+    clearBtn: {
+        backgroundColor: "#f44336",
+        height: 35,
+        width: "35%",
+        padding: 3,
+        alignSelf: "center",
+        marginRight: 30,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
+        marginLeft: 28
     }
 
 })

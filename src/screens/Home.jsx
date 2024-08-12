@@ -7,7 +7,6 @@ import Cart from '../tabs/Cart';
 import Account from '../tabs/Account';
 import Header from '../components/Header';
 import { useSelector } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Home = () => {

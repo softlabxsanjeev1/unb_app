@@ -3,48 +3,50 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeItemFromCart } from '../redux/slices/CartSlice';
+import { cleanCart, removeItemFromCart } from '../redux/slices/CartSlice';
 import { imagePath } from '../../App';
-import clear from '../assets/images/clear.png'
 import axios from 'axios';
 import { AuthContext } from '../context/authContext';
 
 const Checkout = () => {
     const [state, setState] = useContext(AuthContext)
+    const item = useSelector(state => state.address);
     const user = state.user;
     // console.log(user)
+    // console.log(JSON.stringify(state.token))
     const userId = user._id;
+    // console.log(userId)
     const [visible, setVisible] = useState(false)
+    const [paymentId, setPaymentId] = useState("")
     const [loading, setLoading] = useState(false)
-    const [addressLoading, setaddressLoading] = useState(false)
-    const [userAddress, setUserAddress] = useState([])
-    const [selectedAddress, setSelectedAddress] = useState()
+    // const [addressLoading, setaddressLoading] = useState(false)
+    // const [userAddresses, setUserAddresses] = useState([])
+    const [deliveryAddress, setDeliveryAddress] = useState(item?.data)
+    // console.log(deliveryAddress.name)
+    // console.log(deliveryAddress)
 
     const navigation = useNavigation();
     const items = useSelector(state => state.cart);
     const [cartItems, setCartItems] = useState([])
     const dispatch = useDispatch();
+    // const fetchUserAddress = async () => {
 
-
-    const fetchUserAddress = async () => {
-        try {
-            setaddressLoading(true);
-            const { data } = await axios.get("user/get-all-addresses", { userId });
-            console.log(data)
-            setaddressLoading(false);
-            // setUserAddress(data);
-            console.log(userAddress)
-        } catch (error) {
-            setaddressLoading(false);
-            setVisible(false)
-            Alert.alert("Error", "Unable to fetch addresses")
-            console.log(error);
-        }
-    }
+    //     try {
+    //         const { data } = await axios.get(`user/get-addresses`, { userId });
+    //         console.log(data)
+    //         // setUserAddress(data);
+    //         console.log(userAddresses)
+    //     } catch (error) {
+    //         setVisible(false)
+    //         Alert.alert("Error", "Unable to fetch addresses")
+    //         console.log(error);
+    //     }
+    // }
 
     useEffect(() => {
         setCartItems(items.data);
-    }, [items]);
+        setDeliveryAddress(item.data)
+    }, [items, item]);
     // console.log(JSON.stringify(cartItems))
     const total = getTotal = () => {
         let total = 0;
@@ -54,33 +56,64 @@ const Checkout = () => {
         return total.toFixed(0)
     }
 
+    const handlePlaceOrder = async () => {
+        setLoading(true)
+        console.log("order palces")
+        try {
+            const orderData = {
+                userId: userId,
+                cartItems: cartItems,
+                shippingAddress: deliveryAddress,
+                totalPrice: total(),
+            }
 
-
-    const handlePayment = () => {
-        var options = {
-            description: 'Purchase Our Unique Bazar Product',
-            currency: 'INR',
-            key: 'rzp_test_f0OZHGJrgtUxhn', // Your api key
-            amount: (total() * 100),
-            name: 'Unique Bazar',
-            prefill: {
-                email: 'sanjeev7056480@gmail.com',
-                contact: '9191919191',
-                name: 'Unique Bazar'
-            },
-            theme: { color: '#2986cc' }
+            const { data } = await axios.post("user/place-order", orderData)
+            if (data) {
+                Alert.alert("Success", "Order placed")
+            }
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            Alert.alert("Error", "Error in order place")
         }
-        RazorpayCheckout.open(options).then((data) => {
-            alert(`Success: ${data.razorpay_payment_id}`);
-        }).catch((error) => {
-            alert(`Error: ${error.code} | ${error.description}`);
-        })
-        alert("Your Redirecting to payment gateway");
+
+    }
+
+
+    const handlePayment = async () => {
+        if (deliveryAddress !== '' && cartItems !== '') {
+            var options = {
+                description: 'Purchase Our Unique Bazar Product',
+                currency: 'INR',
+                key: 'rzp_test_f0OZHGJrgtUxhn', // Your api key
+                amount: (total() * 100),
+                name: 'Unique Bazar',
+                prefill: {
+                    email: 'sanjeev7056480@gmail.com',
+                    contact: '9191919191',
+                    name: 'Unique Bazar'
+                },
+                theme: { color: '#2986cc' }
+            }
+            RazorpayCheckout.open(options).then(() => {
+                // await setPaymentId(data.razorpay_payment_id)
+                handlePlaceOrder()
+                dispatch(cleanCart())
+                setLoading(false)
+                navigation.navigate("Ordersuccess")
+                Alert.alert("Success", "Order placed success fully");
+            }).catch((error) => {
+                Alert.alert(`Error: ${error.code} | ${error.description}`);
+            })
+            Alert.alert("Your Redirecting to payment gateway");
+
+        } else {
+            Alert.alert("Error", "Please enter all credentials")
+        }
     }
 
     return (
         <View style={styles.container}>
-            <Text style={{ color: "#7fb209", fontSize: 24, alignSelf: "center", fontWeight: "500", marginVertical: 10 }}>Purcahesed Items List</Text>
             <View style={styles.purchaseContainer}>
                 <FlatList data={cartItems} renderItem={({ item, index }) => {
                     return (
@@ -96,14 +129,16 @@ const Checkout = () => {
                                     </Text>
                                 </View>
                                 <View style={styles.qtyview}>
-                                    <Text style={styles.price}>{'Rs. ' + item.price}</Text>
                                     <Text style={styles.btnQtyText}>Qty : {item.qty}</Text>
+                                    <Text style={styles.price}>{'Rs. ' + item.price * item.qty}</Text>
                                 </View>
                             </View>
-                            <TouchableOpacity onPress={() => {
-                                dispatch(removeItemFromCart(index))
-                            }}>
-                                <Image style={styles.clearImg} source={clear} />
+                            <TouchableOpacity
+                                style={styles.clearImg}
+                                onPress={() => {
+                                    dispatch(removeItemFromCart(index))
+                                }}>
+                                <Text style={{ color: "#f3f6f4", fontSize: 12, fontWeight: "700" }}>Remove</Text>
                             </TouchableOpacity>
                         </TouchableOpacity>
                     )
@@ -116,25 +151,32 @@ const Checkout = () => {
                 </Pressable>
             </View>
             <View style={styles.selectedAddressContainer}>
-                <Text>Selected address detail</Text>
+                <Text style={{ color: "#000000", fontSize: 17, marginBottom: 2, fontWeight: "700" }}>{deliveryAddress.name}</Text>
+                <Text style={{ color: "#000000", fontSize: 13 }}>Phone no - {deliveryAddress.phone}</Text>
+                <Text style={{ color: "#000000", fontSize: 13 }}>House no : {deliveryAddress.houseno} {deliveryAddress.street}</Text>
+                <Text style={{ color: "#000000", fontSize: 13 }}>Near : {deliveryAddress.landmark}, {deliveryAddress.city}</Text>
+                <Text style={{ color: "#000000", fontSize: 13 }}>State  {deliveryAddress.postalCode}  {deliveryAddress.country}</Text>
+                <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginVertical: 10, }}>
+                    <Pressable
+                        style={styles.clearBtn}
+                        onPress={() => {
+                            setDeliveryAddress("")
+                        }
+                        }
+                    >
+                        <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}>Clear</Text>
+                    </Pressable>
+                    {/* <Pressable style={styles.changeBtn}
+                        onPress={() => {
+                            setVisible(true)
+                            fetchUserAddress()
+                        }}
+                    >
+                        <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}
+                        >Choose Address</Text>
+                    </Pressable> */}
+                </View>
             </View>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 5, marginHorizontal: 20 }}>
-                <Pressable style={styles.changeBtn}
-                    onPress={() => setVisible(false)}
-                >
-                    <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}>Set Address</Text>
-                </Pressable>
-                <Pressable style={styles.changeBtn}
-                    onPress={() => {
-                        setVisible(true)
-                        fetchUserAddress()
-                    }}
-                >
-                    <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}
-                    >Choose Address</Text>
-                </Pressable>
-            </View>
-
             {visible && (
                 <View style={styles.addressContainer}>
                     <ScrollView horizontal>
@@ -143,17 +185,25 @@ const Checkout = () => {
                 </View>
             )}
             <View style={styles.container2}>
+                <Text style={{ fontWeight: "500", fontSize: 18, color: "#444444", alignSelf: "flex-start", marginBottom: 5 }}>{`Shipping to : ${user.name}`}</Text>
                 <View style={styles.tab}>
-                    <Text style={{ fontWeight: "500", fontSize: 18 }}>{`Qty : ${cartItems.length}`}</Text>
-                    <Text style={{ fontWeight: "700", fontSize: 18 }}>{`Total : ${total()} Rs`}</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 16, color: "#000000" }}>Items Quantity</Text>
+                    <Text style={{ fontWeight: "500", fontSize: 15, color: "#000000", marginRight: 10 }}>{`${cartItems.length}`}</Text>
                 </View>
-                <TouchableOpacity style={styles.checkout}
-                    onPress={() => {
-                        onPress = { handlePayment }
-                    }}
-                >
-                    <Text style={{ color: "#fff", fontSize: 22, fontWeight: "600" }}>Pay</Text>
-                </TouchableOpacity>
+                <View style={{ borderWidth: 1, borderColor: "#000000", width: "101%" }}></View>
+                <View style={styles.tab}>
+                    <Text style={{ fontWeight: "700", fontSize: 16, color: "#000000" }}>Delivery Charges</Text>
+                    <Text style={{ fontWeight: "500", fontSize: 15, color: "#000000" }}>{`0 Rs`}</Text>
+                </View>
+                <View style={{ borderWidth: 1, borderColor: "#000000", width: "101%" }}></View>
+                <View style={styles.tab}>
+                    <Text style={{ fontWeight: "700", fontSize: 16, color: "#000000" }}>Grand Total</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 15, color: "#000000" }}>{`${total()} Rs`}</Text>
+                </View>
+                <Pressable style={styles.checkout}
+                    onPress={handlePayment}>
+                    <Text style={{ color: "#fff", fontSize: 22, fontWeight: "600" }}>{loading ? "Please wait ...." : "Place order"}</Text>
+                </Pressable>
             </View>
         </View>
     )
@@ -208,16 +258,16 @@ const styles = StyleSheet.create({
         height: 40
     },
     purchaseContainer: {
-        height: 105,
+        height: 150,
         width: Dimensions.get('window').width - 20,
         marginLeft: 10,
         padding: 5,
-        backgroundColor: "#cfe2f3",
+        backgroundColor: "#eeeeee",
         borderRadius: 10,
     },
     productItem: {
         width: Dimensions.get('window').width - 32,
-        height: 55,
+        height: 65,
         backgroundColor: '#fff',
         flexDirection: 'row',
         alignItems: "center",
@@ -233,7 +283,8 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         objectFit: "contain",
         marginVertical: 10,
-        marginRight: -50
+        marginRight: -40,
+        marginLeft: 5
     },
     name: {
         fontSize: 16,
@@ -245,53 +296,59 @@ const styles = StyleSheet.create({
         color: '#8fce00',
         fontSize: 17,
         fontWeight: '800',
-
     },
     qtyview: {
         flexDirection: "row",
         alignItems: "center",
         gap: 30
     },
-
     btnQtyText: {
         fontSize: 15,
         fontWeight: "700"
     },
-
     clearImg: {
+        backgroundColor: "#f44336",
         height: 30,
-        width: 23,
-        tintColor: "#f44336",
-        marginRight: 30,
+        width: "20%",
+        padding: 3,
+        alignSelf: "center",
+        marginRight: 15,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
     },
     container2: {
         position: "absolute",
         bottom: 0,
-        height: 40,
-        width: Dimensions.get('window').width,
+        height: "auto",
+        width: Dimensions.get('window').width - 5,
         alignItems: "center",
-        marginBottom: 110
+        paddingHorizontal: 20,
+        backgroundColor: "#eeeeee",
+        marginLeft: 1,
+        paddingBottom: 30,
+        paddingTop: 10
     },
     tab: {
         width: '100%',
-        height: "100%",
         flexDirection: "row",
-        justifyContent: "space-evenly",
+        justifyContent: "space-between",
+        marginVertical: 5
     },
     checkout: {
-        width: "70%",
-        height: '100%',
+        width: "80%",
+        height: 40,
         backgroundColor: "#8fce00",
         borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",
-        marginLeft: 5
+        marginLeft: 5,
+        marginTop: 20
     },
     addressContainer: {
         height: 125,
         width: Dimensions.get('window').width - 20,
         marginLeft: 10,
-
         padding: 5,
         backgroundColor: "#eeeeee",
         borderRadius: 10,
@@ -299,23 +356,32 @@ const styles = StyleSheet.create({
     },
     selectedAddressContainer: {
         marginTop: 10,
-        height: 90,
+        height: "auto",
         width: Dimensions.get('window').width - 30,
         marginLeft: 10,
         padding: 5,
         backgroundColor: "#f3f6f4",
         borderRadius: 10,
+        zIndex: 9
     },
     changeBtn: {
         height: 35,
-        width: "40%",
+        width: "45%",
         backgroundColor: "#1d87e7",
         alignSelf: "center",
-        marginTop: 20,
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center"
-
-
+    },
+    clearBtn: {
+        backgroundColor: "#f44336",
+        height: 35,
+        width: "35%",
+        padding: 3,
+        alignSelf: "center",
+        marginRight: 30,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
     }
 });

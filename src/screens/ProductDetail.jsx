@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "rea
 import React, { useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-import { addItemToWishList, removeItemFromWishList } from "../redux/slices/WishlistSlice";
+import { addItemToWishList } from "../redux/slices/WishlistSlice";
 import { addItemToCart } from "../redux/slices/CartSlice";
 import { imagePath } from "../../App";
 
@@ -53,14 +53,14 @@ const ProductDetail = () => {
                         onPress={() => {
                             dispatch(
                                 addItemToCart({
-                                    category: route.params.data.category,
-                                    description: route.params.data.description,
                                     id: route.params.data._id,
+                                    name: route.params.data.name,
+                                    productId: route.params.data.productId,
                                     image: route.params.data.image,
+                                    description: route.params.data.description,
                                     price: route.params.data.price,
                                     qty: qty,
                                     rating: route.params.data.rating,
-                                    name: route.params.data.name,
                                 }),
                             );
                             // alert(`${qty} items added to cart`)
