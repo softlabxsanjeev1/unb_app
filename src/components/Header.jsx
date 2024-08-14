@@ -1,8 +1,21 @@
 import { View, Text, Image, StyleSheet, Dimensions } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const { height, width } = Dimensions.get('window');
 
 const Header = () => {
+    const [name, setName] = useState("")
+    const checkUser = async () => {
+        const user = await AsyncStorage.getItem('token');
+        if (user) {
+            const data = JSON.parse(user)
+            setName(data.user.name)
+        }
+    }
+
+    useEffect(() => {
+        checkUser()
+    }, [])
 
     return (
         <View style={styles.container}>
@@ -10,12 +23,11 @@ const Header = () => {
             <Text style={styles.logotxt}>Unique Bajar</Text>
             <View style={{ flexDirection: "column", alignItems: "center" }}>
                 <Image style={styles.userIcon} source={require('../assets/images/user-icon.png')} />
-                {/* <Text style={{ color: "#000000", fontWeight: "500" }}>{user.name}</Text> */}
+                <Text style={{ color: "#000000", fontWeight: "500" }}>{name}</Text>
             </View>
         </View>
     )
 }
-
 export default Header
 
 const styles = StyleSheet.create({
@@ -40,7 +52,10 @@ const styles = StyleSheet.create({
         borderRadius: 50
     },
     logotxt: {
-        fontSize: 20,
-        fontWeight: "600"
+        color: "#000000",
+        fontSize: 23,
+        fontWeight: "700",
     }
 })
+
+

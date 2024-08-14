@@ -26,24 +26,28 @@ const WishList = () => {
                             style={styles.productItem}>
                             <Image source={{ uri: `${imagePath}${item.image}` }} style={styles.itemImage} />
                             <View style={{ marginTop: 10 }}>
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", width: 305 }}>
-                                    <View>
-                                        <Text style={styles.name}>
-                                            {item.name.length > 25
-                                                ? item.name.substring(0, 25) + '...' : item.name}
-                                        </Text>
-                                        <Text style={styles.desc}>
-                                            {item.description.length > 30
-                                                ? item.description.substring(0, 30) + '...' : item.description} ...more
-                                        </Text>
-                                    </View>
-                                    <TouchableOpacity onPress={() => {
-                                        dispatch(removeItemFromWishList(index))
-                                    }}>
-                                        <Image style={styles.clearImg} source={clear} />
-                                    </TouchableOpacity>
+                                <View style={{ width: 170 }}>
+                                    <Text style={styles.name}>
+                                        {item.name.length > 25
+                                            ? item.name.substring(0, 25) + '...' : item.name}
+                                    </Text>
+                                    <Text style={styles.desc}>
+                                        {item.description.length > 30
+                                            ? item.description.substring(0, 40) + '...' : item.description} ...more
+                                    </Text>
+                                    <Text style={styles.price}>
+                                        Rs. {item.price}
+                                    </Text>
                                 </View>
                             </View>
+                            <TouchableOpacity
+                                style={styles.clearImg}
+                                onPress={() => {
+                                    dispatch(removeItemFromWishList(index))
+
+                                }}>
+                                <Text style={{ color: "#000000", fontSize: 14, fontWeight: "500" }}>Remove</Text>
+                            </TouchableOpacity>
                         </TouchableOpacity>
                     )
                 }} />
@@ -63,8 +67,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff'
     },
     productItem: {
-        width: Dimensions.get('window').width - 2,
-        height: 110,
+        width: Dimensions.get('window').width - 10,
+        height: "auto",
         marginTop: 3,
         backgroundColor: '#fff',
         flexDirection: 'row',
@@ -74,16 +78,18 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
     },
     itemImage: {
-        width: 80,
-        height: 90,
+        width: 65,
+        height: 70,
         borderRadius: 20,
         padding: 10,
         objectFit: "contain"
     },
     name: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: '700',
         marginLeft: 20,
+        marginBottom: 5,
+        color: "#000000"
     },
     desc: {
         marginLeft: 20,
@@ -97,10 +103,16 @@ const styles = StyleSheet.create({
         marginRight: 30
     },
     clearImg: {
-        height: 25,
-        width: 25,
-        tintColor: "#f43e31",
-        marginLeft: 40,
+        backgroundColor: "#f44336",
+        height: 30,
+        width: "22%",
+        padding: 3,
+        alignSelf: "center",
+        marginRight: 30,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
+        marginLeft: 22
     },
     noItems: {
         width: "100%",

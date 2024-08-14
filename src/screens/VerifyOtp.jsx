@@ -2,27 +2,32 @@ import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } fro
 import React, { useState } from 'react'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 
 const VerifyOtp = () => {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false)
+    const navigation = useNavigation()
 
     const otpVerify = async () => {
-        const newOtp = Number(otp)
+
         try {
             setLoading(true);
-            let activationToken = await AsyncStorage.getItem("activationToken")
-            const { data } = await axios.post(
+            let email = await AsyncStorage.getItem("userdata")
+            email = JSON.parse(email)
+            const response = await axios.post(
                 "user/verify",
-                { newOtp, activationToken }
+                { otp, email }
             );
+            // console.log(response)
             setLoading(false)
-            await AsyncStorage.clear();
+            await AsyncStorage.remove("userdata")
             navigation.navigate('Login')
+            // console.log(AsyncStorage.getItem("userdata"))
             // console.log("Login Data==> ", { userData });
         } catch (error) {
-            alert(error.response.data.message);
+            alert(error.response);
             setLoading(false);
             console.log(error);
         }
@@ -44,7 +49,7 @@ const VerifyOtp = () => {
                         alert("Please enter OTP")
                     }
                 }}>
-                <Text style={styles.btn}>Verify</Text>
+                <Text style={styles.btn}>{loading ? "Please wait..." : "Verify"}</Text>
             </TouchableOpacity>
         </SafeAreaView>
     )

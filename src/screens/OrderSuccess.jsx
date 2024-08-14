@@ -53,9 +53,9 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     logo: {
-        fontSize: 30,
+        fontSize: 25,
         fontWeight: '800',
-        color: 'red',
+        color: '#cc0000',
     },
     spalshLogo: {
         objectFit: "contain",

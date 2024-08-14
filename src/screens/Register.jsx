@@ -14,17 +14,14 @@ const Register = ({ navigation }) => {
     const saveUser = async () => {
         try {
             setLoading(true)
+            await AsyncStorage.removeItem("userdata");
             const { data } = await axios.post("/user/register",
                 { name, email, password, phone }
             );
-            const prevToken = await AsyncStorage.getItem("activationToken");
-            if (prevToken === null) {
-                await AsyncStorage.setItem("activationToken", JSON.stringify(data.activationToken));
-            } else {
-                await AsyncStorage.removeItem("activationToken")
-            }
-            let asyncStoreData = await AsyncStorage.getItem("activationToken");
-            console.log(asyncStoreData)
+            // console.log(data.userdata.email)
+            await AsyncStorage.setItem("userdata", JSON.stringify(data.userdata.email));
+            // let asyncStoreData = await AsyncStorage.getItem("userdata");
+            // console.log(asyncStoreData)
             setLoading(false)
             navigation.navigate("Verifyotp")
             // console.log("REgister Data==> ", { name, email, password, phone, address, answer });

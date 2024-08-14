@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet, FlatList, Image, Pressable, ScrollView, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, FlatList, Image, Pressable, Alert } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
@@ -7,21 +7,21 @@ import { cleanCart, removeItemFromCart } from '../redux/slices/CartSlice';
 import { imagePath } from '../../App';
 import axios from 'axios';
 import { AuthContext } from '../context/authContext';
+import { addAddress } from '../redux/slices/AddressSlice';
 
 const Checkout = () => {
     const [state, setState] = useContext(AuthContext)
-    const item = useSelector(state => state.address);
+    const addData = useSelector(state => state.address);
     const user = state.user;
     // console.log(user)
     // console.log(JSON.stringify(state.token))
     const userId = user._id;
     // console.log(userId)
     const [visible, setVisible] = useState(false)
-    const [paymentId, setPaymentId] = useState("")
     const [loading, setLoading] = useState(false)
-    // const [addressLoading, setaddressLoading] = useState(false)
-    // const [userAddresses, setUserAddresses] = useState([])
-    const [deliveryAddress, setDeliveryAddress] = useState(item?.data)
+    const [userAddresses, setUserAddresses] = useState([])
+    const [deliveryAddress, setDeliveryAddress] = useState("")
+    const [prevAddress, setPrevAddress] = useState(addData.data)
     // console.log(deliveryAddress.name)
     // console.log(deliveryAddress)
 
@@ -29,24 +29,23 @@ const Checkout = () => {
     const items = useSelector(state => state.cart);
     const [cartItems, setCartItems] = useState([])
     const dispatch = useDispatch();
-    // const fetchUserAddress = async () => {
-
-    //     try {
-    //         const { data } = await axios.get(`user/get-addresses`, { userId });
-    //         console.log(data)
-    //         // setUserAddress(data);
-    //         console.log(userAddresses)
-    //     } catch (error) {
-    //         setVisible(false)
-    //         Alert.alert("Error", "Unable to fetch addresses")
-    //         console.log(error);
-    //     }
-    // }
+    const fetchUserAddress = async () => {
+        try {
+            const response = await axios.get(`user/get-addresses/${userId}`);
+            // console.log(response.data.addresses)
+            setUserAddresses(response.data.addresses);
+            // console.log(userAddresses)
+        } catch (error) {
+            setVisible(false)
+            Alert.alert("Error", "Unable to fetch addresses")
+            console.log(error);
+        }
+    }
 
     useEffect(() => {
         setCartItems(items.data);
-        setDeliveryAddress(item.data)
-    }, [items, item]);
+        setDeliveryAddress(addData?.data)
+    }, [items]);
     // console.log(JSON.stringify(cartItems))
     const total = getTotal = () => {
         let total = 0;
@@ -69,7 +68,9 @@ const Checkout = () => {
 
             const { data } = await axios.post("user/place-order", orderData)
             if (data) {
+                await dispatch(cleanCart())
                 Alert.alert("Success", "Order placed")
+                navigation.navigate("Ordersuccess")
             }
         } catch (error) {
             console.log(error)
@@ -98,10 +99,8 @@ const Checkout = () => {
             RazorpayCheckout.open(options).then(() => {
                 // await setPaymentId(data.razorpay_payment_id)
                 handlePlaceOrder()
-                dispatch(cleanCart())
                 setLoading(false)
-                navigation.navigate("Ordersuccess")
-                Alert.alert("Success", "Order placed success fully");
+                // Alert.alert("Success", "Order placed success fully");
             }).catch((error) => {
                 Alert.alert(`Error: ${error.code} | ${error.description}`);
             })
@@ -155,7 +154,7 @@ const Checkout = () => {
                 <Text style={{ color: "#000000", fontSize: 13 }}>Phone no - {deliveryAddress.phone}</Text>
                 <Text style={{ color: "#000000", fontSize: 13 }}>House no : {deliveryAddress.houseno} {deliveryAddress.street}</Text>
                 <Text style={{ color: "#000000", fontSize: 13 }}>Near : {deliveryAddress.landmark}, {deliveryAddress.city}</Text>
-                <Text style={{ color: "#000000", fontSize: 13 }}>State  {deliveryAddress.postalCode}  {deliveryAddress.country}</Text>
+                <Text style={{ color: "#000000", fontSize: 13 }}>{deliveryAddress.statename}  {deliveryAddress.postalCode}  {deliveryAddress.country}</Text>
                 <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginVertical: 10, }}>
                     <Pressable
                         style={styles.clearBtn}
@@ -164,50 +163,74 @@ const Checkout = () => {
                         }
                         }
                     >
-                        <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}>Clear</Text>
+                        <Text style={{ color: "#f3f6f4", fontSize: 13, fontWeight: "600" }}>Clear</Text>
                     </Pressable>
-                    {/* <Pressable style={styles.changeBtn}
+                    <Pressable style={styles.changeBtn}
                         onPress={() => {
-                            setVisible(true)
+                            setVisible(!visible)
                             fetchUserAddress()
                         }}
                     >
-                        <Text style={{ color: "#f3f6f4", fontSize: 15, fontWeight: "600" }}
-                        >Choose Address</Text>
-                    </Pressable> */}
+                        <Text style={{ color: "#f3f6f4", fontSize: 13, fontWeight: "600" }}
+                        >New address</Text>
+                    </Pressable>
                 </View>
             </View>
             {visible && (
                 <View style={styles.addressContainer}>
-                    <ScrollView horizontal>
-                        { }
-                    </ScrollView>
+                    <FlatList
+                        data={userAddresses}
+                        renderItem={({ item }) => {
+                            return (
+                                <View
+                                    style={[styles.addresscard,
+                                    { borderColor: deliveryAddress === item ? "#ea2f22" : "#bcbcbc" },
+                                    { borderWidth: deliveryAddress === item ? 1.5 : 0.5 }
+                                    ]}>
+                                    <Pressable onPress={() => {
+                                        setDeliveryAddress(item)
+                                        dispatch(addAddress(item))
+                                    }}>
+                                        <Text style={styles.name}>{item?.name}</Text>
+                                        <Text style={styles.phoneStyle}>{item?.phone}</Text>
+                                        <Text style={styles.commontxt}>{item?.houseno}</Text>
+                                        <Text style={styles.commontxt}>Near : {item?.landmark}</Text>
+                                        <Text style={styles.commontxt}>{item?.street}, {item?.city}</Text>
+                                        <Text style={styles.commontxt}>{item?.postalCode} ,{item?.statename}, {item?.country}</Text>
+                                    </Pressable>
+                                </View>
+                            )
+                        }}
+                        keyExtractor={item => item.id}
+                        horizontal
+                    />
                 </View>
             )}
             <View style={styles.container2}>
-                <Text style={{ fontWeight: "500", fontSize: 18, color: "#444444", alignSelf: "flex-start", marginBottom: 5 }}>{`Shipping to : ${user.name}`}</Text>
+                <Text style={{ fontWeight: "500", fontSize: 16, color: "#444444", alignSelf: "flex-start", marginBottom: 5 }}>{`Shipping to : ${user.name}`}</Text>
                 <View style={styles.tab}>
-                    <Text style={{ fontWeight: "700", fontSize: 16, color: "#000000" }}>Items Quantity</Text>
-                    <Text style={{ fontWeight: "500", fontSize: 15, color: "#000000", marginRight: 10 }}>{`${cartItems.length}`}</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 14, color: "#000000" }}>Items Quantity</Text>
+                    <Text style={{ fontWeight: "500", fontSize: 13, color: "#000000", marginRight: 10 }}>{`${cartItems.length}`}</Text>
                 </View>
                 <View style={{ borderWidth: 1, borderColor: "#000000", width: "101%" }}></View>
                 <View style={styles.tab}>
-                    <Text style={{ fontWeight: "700", fontSize: 16, color: "#000000" }}>Delivery Charges</Text>
-                    <Text style={{ fontWeight: "500", fontSize: 15, color: "#000000" }}>{`0 Rs`}</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 14, color: "#000000" }}>Delivery Charges</Text>
+                    <Text style={{ fontWeight: "500", fontSize: 13, color: "#000000" }}>{`0 Rs`}</Text>
                 </View>
                 <View style={{ borderWidth: 1, borderColor: "#000000", width: "101%" }}></View>
                 <View style={styles.tab}>
-                    <Text style={{ fontWeight: "700", fontSize: 16, color: "#000000" }}>Grand Total</Text>
-                    <Text style={{ fontWeight: "700", fontSize: 15, color: "#000000" }}>{`${total()} Rs`}</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 14, color: "#000000" }}>Grand Total</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 13, color: "#000000" }}>{`${total()} Rs`}</Text>
                 </View>
                 <Pressable style={styles.checkout}
                     onPress={handlePayment}>
-                    <Text style={{ color: "#fff", fontSize: 22, fontWeight: "600" }}>{loading ? "Please wait ...." : "Place order"}</Text>
+                    <Text style={{ color: "#fff", fontSize: 20, fontWeight: "600" }}>{loading ? "Please wait ...." : "Place order"}</Text>
                 </Pressable>
             </View>
         </View>
     )
 }
+
 
 export default Checkout
 
@@ -221,44 +244,8 @@ const styles = StyleSheet.create({
         color: "#000000",
         fontWeight: "500"
     },
-    detailsection: {
-        marginTop: 5,
-        height: "auto",
-        width: Dimensions.get('window').width - 20,
-        marginLeft: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-    },
-    smallbox: {
-        paddingLeft: 15,
-        marginTop: 8,
-        borderWidth: 1,
-        borderRadius: 6,
-        width: '38%',
-        textAlignVertical: 'top',
-        height: 38
-    },
-    mediumbox: {
-        paddingLeft: 15,
-        marginTop: 8,
-        borderWidth: 1,
-        borderRadius: 6,
-        width: '55%',
-        textAlignVertical: 'top',
-        height: 38
-
-    },
-    inputStyle: {
-        paddingLeft: 15,
-        marginTop: 6,
-        borderWidth: 1,
-        borderRadius: 10,
-        width: '100%',
-        textAlignVertical: 'top',
-        height: 40
-    },
     purchaseContainer: {
-        height: 150,
+        height: 110,
         width: Dimensions.get('window').width - 20,
         marginLeft: 10,
         padding: 5,
@@ -267,7 +254,7 @@ const styles = StyleSheet.create({
     },
     productItem: {
         width: Dimensions.get('window').width - 32,
-        height: 65,
+        height: 45,
         backgroundColor: '#fff',
         flexDirection: 'row',
         alignItems: "center",
@@ -278,8 +265,8 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     itemImage: {
-        width: 50,
-        height: 90,
+        width: 35,
+        height: 80,
         borderRadius: 20,
         objectFit: "contain",
         marginVertical: 10,
@@ -327,7 +314,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#eeeeee",
         marginLeft: 1,
         paddingBottom: 30,
-        paddingTop: 10
+        paddingTop: 5
     },
     tab: {
         width: '100%',
@@ -343,10 +330,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginLeft: 5,
-        marginTop: 20
+        marginTop: 5
     },
     addressContainer: {
-        height: 125,
+        height: 140,
         width: Dimensions.get('window').width - 20,
         marginLeft: 10,
         padding: 5,
@@ -355,7 +342,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     selectedAddressContainer: {
-        marginTop: 10,
+        marginTop: 5,
         height: "auto",
         width: Dimensions.get('window').width - 30,
         marginLeft: 10,
@@ -365,8 +352,8 @@ const styles = StyleSheet.create({
         zIndex: 9
     },
     changeBtn: {
-        height: 35,
-        width: "45%",
+        height: 28,
+        width: "40%",
         backgroundColor: "#1d87e7",
         alignSelf: "center",
         borderRadius: 10,
@@ -375,13 +362,40 @@ const styles = StyleSheet.create({
     },
     clearBtn: {
         backgroundColor: "#f44336",
-        height: 35,
-        width: "35%",
+        height: 28,
+        width: "42%",
         padding: 3,
         alignSelf: "center",
         marginRight: 30,
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
+    },
+    addresscard: {
+        height: 120,
+        width: "auto",
+        border: "#0000",
+        borderWidth: 0.5,
+        marginVertical: 5,
+        marginHorizontal: 10,
+        paddingVertical: 5,
+        paddingHorizontal: 10
+    },
+    name: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#000000"
+
+    },
+    phoneStyle: {
+        fontSize: 14,
+        fontWeight: "500",
+        color: "#000000"
+    },
+    commontxt: {
+        fontSize: 13,
+        fontWeight: "400",
+        color: "#000000"
+
     }
 });

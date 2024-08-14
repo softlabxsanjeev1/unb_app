@@ -34,9 +34,18 @@ const ProductDetail = () => {
             <Image source={{ uri: `${imagePath}${route.params.data.image}` }} style={styles.image} />
             <TouchableOpacity style={styles.wishlistBtn}
                 onPress={() => {
-                    dispatch(addItemToWishList(route.params.data));
+                    dispatch(addItemToWishList(
+                        {
+                            id: route.params.data._id,
+                            name: route.params.data.name,
+                            description: route.params.data.description,
+                            productId: route.params.data.productId,
+                            image: route.params.data.image,
+                            price: route.params.data.price,
+                        }
+                    ));
                     setSelected(!selected)
-                    console.log("item added to wishlist")
+                    // console.log("item added to wishlist")
                 }}>
                 <Image source={selected == 1 ? require('../assets/images/wishlistfill.png') : require('../assets/images/wishlist.png')}
                     style={styles.wishlistIcon} />

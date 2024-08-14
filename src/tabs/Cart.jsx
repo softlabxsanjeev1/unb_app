@@ -15,7 +15,7 @@ const Cart = () => {
     useEffect(() => {
         setCartItems(items.data);
     }, [items]);
-    console.log(JSON.stringify(cartItems))
+    // console.log(JSON.stringify(cartItems))
     const getTotal = () => {
         let total = 0;
         cartItems.map(item => {

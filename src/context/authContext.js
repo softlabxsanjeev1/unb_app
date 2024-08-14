@@ -16,6 +16,7 @@ const AuthProvider = ({ children }) => {
     let token = state && state.token;
 
     // default axios setting
+    axios.defaults.headers.common["token"] = `${token}`;
     axios.defaults.baseURL = "http://192.168.0.193:4000/api/";
     // for server
     // axios.defaults.baseURL = "https://react-native-server-xduw.onrender.com/api/v1";

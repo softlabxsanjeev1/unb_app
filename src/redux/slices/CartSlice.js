@@ -39,7 +39,7 @@ const CartSlice = createSlice({
         },
 
         cleanCart: (state) => {
-            state.cart = [];
+            state.data = [];
         }
     },
 });

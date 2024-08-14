@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, Image, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, SafeAreaView, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import userImage from '../assets/images/user-icon.png'
 import { useNavigation } from '@react-navigation/native'
@@ -10,10 +10,18 @@ const Account = () => {
     const navigation = useNavigation()
     const user = state.user;
     // console.log(state.user)
-    const userLogout = () => {
-        AsyncStorage.removeItem('token' && 'user');
-        alert("Logout success fully")
-        navigation.navigate('Login')
+
+    const userLogout = async () => {
+        {
+            try {
+                await AsyncStorage.removeItem("token");
+                Alert.alert("Success", "User logout successfully")
+                navigation.navigate('Login')
+            }
+            catch (error) {
+                Alert.alert("Error", "token not removed")
+            }
+        }
     }
 
     return (
