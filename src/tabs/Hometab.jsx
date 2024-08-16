@@ -9,11 +9,24 @@ const { height, width } = Dimensions.get('window');
 
 const Hometab = () => {
     const [product, setProduct] = useState([]);
+    const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
     const navigation = useNavigation();
     const colums = 2
     // console.log(products)
 
+    const getAllCategories = async () => {
+        try {
+            setLoading(true);
+            const { data } = await axios.get(`/category/get-category`);
+            // console.log(data)
+            setLoading(false);
+            setCategories(data.category);
+        } catch (error) {
+            setLoading(false);
+            console.log(error);
+        }
+    };
 
     const getAllProducts = async () => {
         try {
@@ -31,12 +44,13 @@ const Hometab = () => {
 
     useEffect(() => {
         getAllProducts()
+        getAllCategories()
     }, []);
 
 
     return (
         <SafeAreaView>
-            <Category />
+            <Category data={categories} />
             <ScrollView style={{ height: width * 1.47, backgroundColor: "#ffffff" }}>
                 <View>
                     <Banner />
@@ -85,15 +99,15 @@ const styles = StyleSheet.create({
     card: {
         borderWidth: 1,
         borderColor: "lightgray",
-        marginVertical: 2,
-        marginHorizontal: 5,
-        width: "46%",
+        marginVertical: 3,
+        marginHorizontal: 3,
+        width: "48%",
         padding: 5,
         backgroundColor: "#ffffff",
         justifyContent: "center",
     },
     cardImage: {
-        height: 81,
+        height: 85,
         width: "92%",
         marginBottom: 7,
         resizeMode: "contain"

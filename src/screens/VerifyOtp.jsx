@@ -1,30 +1,28 @@
-import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import ResetPasswordModal from '../components/ResetPasswordModal';
 
 
 const VerifyOtp = () => {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false)
-    const navigation = useNavigation()
+    const [resetModalVisible, setResetModalvesible] = useState(false)
 
     const otpVerify = async () => {
-
         try {
             setLoading(true);
-            let email = await AsyncStorage.getItem("userdata")
+            let email = await AsyncStorage.getItem("email")
             email = JSON.parse(email)
             const response = await axios.post(
                 "user/verify",
                 { otp, email }
             );
-            // console.log(response)
+            console.log(response)
             setLoading(false)
-            await AsyncStorage.remove("userdata")
-            navigation.navigate('Login')
-            // console.log(AsyncStorage.getItem("userdata"))
+            setResetModalvesible(true)
+            // console.log(AsyncStorage.getItem("email"))
             // console.log("Login Data==> ", { userData });
         } catch (error) {
             alert(error.response);
@@ -35,6 +33,11 @@ const VerifyOtp = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            {resetModalVisible && (
+                <ResetPasswordModal
+                    resetModalVisible={resetModalVisible}
+                    setResetModalvesible={setResetModalvesible} />
+            )}
             <Text style={{ fontWeight: "bold", fontSize: 28, alignSelf: "center", marginBottom: 20 }}>Verify OTP</Text>
             <TextInput style={styles.inputStyle} placeholder={"Enter Password"}
                 inputMode='numeric'

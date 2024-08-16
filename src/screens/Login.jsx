@@ -1,8 +1,9 @@
-import { View, Text, SafeAreaView, Image, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, SafeAreaView, Image, StyleSheet, TextInput, TouchableOpacity, Pressable } from 'react-native'
 import React, { useContext, useState } from 'react'
 import axios from 'axios';
 import { AuthContext } from '../context/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MailModal from '../components/MailModal';
 
 const Login = ({ navigation }) => {
     // custom hook
@@ -10,6 +11,7 @@ const Login = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false)
+    const [mailModalVisible, setMailModalvesible] = useState(false)
 
     const userLogin = async () => {
         try {
@@ -18,12 +20,15 @@ const Login = ({ navigation }) => {
                 "user/login",
                 { email, password }
             );
-            // alert("Login succesfully")
             setState(data);
             // console.log(data.token)
             // console.log(data.user)
             await AsyncStorage.setItem('token', JSON.stringify(data));
+            setLoading(false)
             navigation.navigate('Home')
+            console.log(AsyncStorage.getItem("email"))
+            await AsyncStorage.removeItem("email")
+            console.log(AsyncStorage.getItem("email"))
             // console.log("Login Data==> ", { userData });
         } catch (error) {
             alert(error.response.data.message);
@@ -34,6 +39,11 @@ const Login = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
+            {mailModalVisible && (
+                <MailModal
+                    mailModalVisible={mailModalVisible}
+                    setMailModalvesible={setMailModalvesible} />
+            )}
             <Image source={require('../assets/unlogo.png')} style={styles.img} />
             <Text style={{ fontWeight: "bold", fontSize: 22, alignSelf: "center", marginBottom: 20 }}>Unique Bajar</Text>
             <TextInput style={styles.inputStyle} placeholder={'Enter Email Id'}
@@ -46,6 +56,13 @@ const Login = ({ navigation }) => {
                 secureTextEntry={true}
                 onChangeText={txt => setPassword(txt)}
             />
+            <Pressable
+                style={{ marginTop: 10, alignSelf: "flex-end", marginRight: 40 }}
+                onPress={() => {
+                    setMailModalvesible(true)
+                }}>
+                <Text style={{ color: "#e90c0c", fontSize: 16, fontWeight: "600" }}>Forgot password</Text>
+            </Pressable>
             <TouchableOpacity style={styles.loginBtn}
                 onPress={() => {
                     if (email !== '' && password !== '') {

@@ -190,7 +190,7 @@ const Checkout = () => {
                                     <Pressable onPress={() => {
                                         setDeliveryAddress(item)
                                         dispatch(addAddress(item))
-                                    }}>
+                                    }} key={item._id}>
                                         <Text style={styles.name}>{item?.name}</Text>
                                         <Text style={styles.phoneStyle}>{item?.phone}</Text>
                                         <Text style={styles.commontxt}>{item?.houseno}</Text>

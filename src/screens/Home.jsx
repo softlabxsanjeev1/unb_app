@@ -37,6 +37,7 @@ const Home = () => {
                         setSelectedTab(0)
                     }}>
                     <Image source={selectedTab == 0 ? require('../assets/images/homefill.png') : require('../assets/images/home.png')} style={styles.bottomIcon} />
+                    <Text style={{ color: selectedTab == 0 ? "#000000" : "#bcbcbc" }}>Home</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.bottomTab}
@@ -44,6 +45,7 @@ const Home = () => {
                         setSelectedTab(1)
                     }}>
                     <Image source={selectedTab == 1 ? require('../assets/images/productfill.png') : require('../assets/images/product.png')} style={styles.bottomIcon} />
+                    <Text style={{ color: selectedTab == 1 ? "#000000" : "#bcbcbc" }}>Search</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.bottomTab}
@@ -51,6 +53,7 @@ const Home = () => {
                         setSelectedTab(2)
                     }}>
                     <Image source={selectedTab == 2 ? require('../assets/images/wishlistfill.png') : require('../assets/images/wishlist.png')} style={styles.bottomIcon} />
+                    <Text style={{ color: selectedTab == 2 ? "#000000" : "#bcbcbc" }}>WishList</Text>
                     <View style={{
                         width: 22, height: 22, borderRadius: 10,
                         backgroundColor: "#ea2222", position: 'absolute', right: 10, top: 4,
@@ -65,6 +68,7 @@ const Home = () => {
                         setSelectedTab(3)
                     }}>
                     <Image source={selectedTab == 3 ? require('../assets/images/cartfill.png') : require('../assets/images/cart.png')} style={styles.bottomIcon} />
+                    <Text style={{ color: selectedTab == 3 ? "#000000" : "#bcbcbc" }}>Cart</Text>
                     <View style={{
                         width: 22, height: 22, borderRadius: 10,
                         backgroundColor: "#ea2222", position: 'absolute', right: 10, top: 4,
@@ -79,6 +83,7 @@ const Home = () => {
                         setSelectedTab(4)
                     }}>
                     <Image source={selectedTab == 4 ? require('../assets/images/userfill.png') : require('../assets/images/user.png')} style={styles.bottomIcon} />
+                    <Text style={{ color: selectedTab == 4 ? "#000000" : "#bcbcbc" }}>Profile</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

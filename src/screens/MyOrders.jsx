@@ -71,7 +71,10 @@ const MyOrders = () => {
                     </View>
                 ))
             ) : (
-                <Text>No item available</Text>
+                <View style={styles.noItem}>
+                    <Image source={require('../assets/images/notfound.png')} style={styles.errorImg} />
+                    <Text style={{ fontSize: 17, fontWeight: "700", color: "#000000" }}>Now Item present of this category</Text>
+                </View>
             )}
         </ScrollView>
     )
@@ -132,6 +135,16 @@ const styles = StyleSheet.create({
         marginVertical: 6,
         borderRadius: 5,
         paddingHorizontal: 15
-    }
+    },
+    noItem: {
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: "40%"
+    },
+    errorImg: {
+        height: 50,
+        width: 55,
+        marginBottom: 20
+    },
 
 })

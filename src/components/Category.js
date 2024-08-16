@@ -1,19 +1,42 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native'
-import React from 'react'
-import { useNavigation } from '@react-navigation/native'
-import { categoriesData } from '../data/CategoriesData'
+import React, { useEffect, useState } from 'react'
+import { imagePath } from '../../App'
+import axios from 'axios';
 
-const Category = () => {
-  const navigation = useNavigation()
+
+const Category = ({ data, setSearchedList }) => {
+  const [slug, setSlug] = useState("")
+  const [loading, setLoading] = useState(false)
+  //    get products according to category
+  const getCategoryData = async () => {
+    // console.log(slug)
+    try {
+      setLoading(true)
+      const { data } = await axios.get(`/user/category-product/${slug}`);
+      // console.log(data)
+      setLoading(false)
+      setSearchedList(data.products);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getCategoryData()
+  }, [slug])
   return (
     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.container}>
-      {categoriesData.map((item) => (
+      {data.map((item) => (
         <View key={item._id} >
           <TouchableOpacity style={styles.catContainer}
-            // onPress={() => navigation.navigate(item.path)}
-            onPress={() => navigation.navigate('about')}
+            onPress={() => {
+              setSlug(item.slug)
+              getCategoryData()
+            }}
+
           >
-            <Image source={item.icon} style={styles.catIcon} />
+            <Image source={{ uri: `${imagePath}${item.image}` }} style={styles.catIcon} />
             <Text style={styles.catTitle} >{item.name}</Text>
           </TouchableOpacity>
         </View>

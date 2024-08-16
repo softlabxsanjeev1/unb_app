@@ -1,7 +1,8 @@
-import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native'
+import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, TextInput, Image, } from 'react-native'
 import React, { useState } from 'react'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import VerifyModal from '../components/VerifyModal';
 
 const Register = ({ navigation }) => {
     const [name, setName] = useState();
@@ -9,6 +10,7 @@ const Register = ({ navigation }) => {
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const [loading, setLoading] = useState(false)
+    const [verifymodalVisible, setVerifyModalvesible] = useState(false)
 
     // btn function
     const saveUser = async () => {
@@ -23,7 +25,7 @@ const Register = ({ navigation }) => {
             // let asyncStoreData = await AsyncStorage.getItem("userdata");
             // console.log(asyncStoreData)
             setLoading(false)
-            navigation.navigate("Verifyotp")
+            setVerifyModalvesible(true)
             // console.log("REgister Data==> ", { name, email, password, phone, address, answer });
         } catch (error) {
             alert(error.response.data.message);
@@ -36,6 +38,11 @@ const Register = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
+                {verifymodalVisible && (
+                    <VerifyModal
+                        verifymodalVisible={verifymodalVisible}
+                        setVerifyModalvesible={setVerifyModalvesible} />
+                )}
                 <Image source={require('../assets/unlogo.png')} style={styles.img} />
                 <Text style={{ fontWeight: "bold", fontSize: 22, alignSelf: "center", color: "green", marginBottom: 20 }}>Unique Bajar</Text>
                 <TextInput placeholder='Enter Name' style={styles.inputStyle}

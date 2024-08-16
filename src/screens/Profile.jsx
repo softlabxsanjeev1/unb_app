@@ -93,7 +93,7 @@ const Profile = () => {
                         <TextInput style={styles.inputBox}
                             value={phone}
                             onChangeText={(txt) => { setPhone(txt) }}
-                            inputMode='tel'
+                            inputMode='numeric'
                             placeholder='new Phone no' />
                     </View>
                     <View style={styles.rowContainer}>
